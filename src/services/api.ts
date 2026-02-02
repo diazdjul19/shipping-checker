@@ -13,6 +13,7 @@ export interface Expedition {
 }
 
 export interface ShippingPlan {
+  name: string;
   service: string;
   description: string;
   etd: string;
@@ -96,7 +97,8 @@ export const api = {
   checkShippingCost: async (payload: {
     weight: number;
     expedition: string;
-    postalCode: string;
+    destination_postal_code: string;
+    destination_address: string;
     latitude: string;
     longitude: string;
   }): Promise<ShippingCostResponse> => {

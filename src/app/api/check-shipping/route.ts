@@ -3,110 +3,102 @@ import { NextResponse } from "next/server";
 interface ShippingPlan {
   service: string;
   description: string;
-  etd: string; // Estimated Time of Delivery
+  etd: string;
   cost: number;
 }
 
 export async function POST(request: Request) {
   try {
     const body = await request.json();
-    const { weight, expedition, postalCode } = body;
+    const {
+      weight,
+      expedition,
+      destination_postal_code,
+      destination_address,
+      latitude,
+      longitude,
+    } = body;
 
     // Validate input
-    if (!weight || !expedition || !postalCode) {
+    if (!weight || !expedition || !destination_postal_code) {
       return NextResponse.json(
         { error: "Weight, expedition, and postal code are required." },
         { status: 400 },
       );
     }
 
-    const weightNum = Number(weight);
-    if (isNaN(weightNum) || weightNum <= 0) {
-      return NextResponse.json({ error: "Invalid weight." }, { status: 400 });
+    const payload = {
+      expedition,
+      destination_address: destination_address || "",
+      destination_postal_code,
+      latitude: latitude || "",
+      longitude: longitude || "",
+      weight: Number(weight),
+    };
+
+    const externalApiResponse = await fetch(
+      "https://auto-helper.javamifi.com/webhook/service/get-rates-service",
+      {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(payload),
+      },
+    );
+
+    if (!externalApiResponse.ok) {
+      const errorText = await externalApiResponse.text();
+      console.error("External API Error:", errorText);
+      return NextResponse.json(
+        { error: "Failed to fetch shipping rates from provider." },
+        { status: 502 },
+      );
     }
 
-    // Simulate realistic dummy data based on expedition
-    let plans: ShippingPlan[] = [];
+    const externalData = await externalApiResponse.json();
 
-    // Base cost calculation logic (just for variety)
-    const baseRate = 10000;
-    const weightFactor = Math.ceil(weightNum) * 5000;
-
-    // Generate plans based on selected expedition
-    // In a real app, this would come from a 3rd party API
-    if (expedition.toLowerCase().includes("jne")) {
-      plans = [
-        {
-          service: "REG",
-          description: "Layanan Reguler",
-          etd: "2-3 Hari",
-          cost: baseRate + weightFactor,
-        },
-        {
-          service: "YES",
-          description: "Yakin Esok Sampai",
-          etd: "1 Hari",
-          cost: (baseRate + weightFactor) * 1.5,
-        },
-        {
-          service: "JTR",
-          description: "JNE Trucking",
-          etd: "5-7 Hari",
-          cost: (baseRate + weightFactor) * 0.4 + 25000, // Min charge usually
-        },
-      ];
-    } else if (expedition.toLowerCase().includes("sicepat")) {
-      plans = [
-        {
-          service: "HALU",
-          description: "Harga Lima Ribu",
-          etd: "2-4 Hari",
-          cost: baseRate * 0.8 + weightFactor,
-        },
-        {
-          service: "GOKIL",
-          description: "Cargo Kilat",
-          etd: "3-6 Hari",
-          cost: (baseRate + weightFactor) * 0.5,
-        },
-        {
-          service: "BEST",
-          description: "Besok Sampai Tujuan",
-          etd: "1 Hari",
-          cost: (baseRate + weightFactor) * 1.4,
-        },
-      ];
-    } else {
-      // Generic Fallback
-      plans = [
-        {
-          service: "Standard",
-          description: "Standard Shipping",
-          etd: "3-5 Days",
-          cost: baseRate + weightFactor,
-        },
-        {
-          service: "Express",
-          description: "Express Shipping",
-          etd: "1-2 Days",
-          cost: (baseRate + weightFactor) * 1.6,
-        },
-      ];
+    // Check for specific error response from external API
+    if (
+      Array.isArray(externalData) &&
+      externalData.length > 0 &&
+      externalData[0]?.status === "error"
+    ) {
+      return NextResponse.json(
+        { error: externalData[0].message || "External API Error" },
+        { status: externalData[0].code || 400 },
+      );
     }
 
-    // Add a slight random variance to make it look "live"
-    plans = plans.map((p) => ({
-      ...p,
-      cost: Math.floor(p.cost),
+    // Check if the response follows the expected structure
+    // Expected: [{ meta: {...}, data: [ ... ] }]
+    if (
+      !Array.isArray(externalData) ||
+      externalData.length === 0 ||
+      !externalData[0].data
+    ) {
+      console.error("Unexpected External API Response:", externalData);
+      return NextResponse.json(
+        { error: "Invalid response from shipping provider." },
+        { status: 502 },
+      );
+    }
+
+    const rates = externalData[0].data.map((rate: any) => ({
+      name: rate.name,
+      service: rate.service,
+      description: rate.description,
+      etd: rate.etd,
+      cost: rate.cost,
     }));
 
     return NextResponse.json({
       success: true,
-      origin: "Jakarta (Dummy)", // Simulating origin
-      destination_postal: postalCode,
+      origin: "Jakarta", // As per user context, might be fixed or dynamic later
+      destination_postal: destination_postal_code,
       expedition: expedition,
-      weight: weightNum,
-      results: plans,
+      weight: payload.weight,
+      results: rates,
     });
   } catch (error) {
     console.error("API Error:", error);

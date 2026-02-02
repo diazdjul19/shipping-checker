@@ -68,9 +68,10 @@ export default function ShippingForm({
     onCheckShipping({
       weight: parseFloat(weight),
       expedition: selectedExpedition,
-      postalCode: postalCode,
-      lat: lat,
-      lon: lon,
+      destination_postal_code: postalCode,
+      destination_address: selectedAddress.address,
+      latitude: lat,
+      longitude: lon,
     });
   };
 
