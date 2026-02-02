@@ -50,6 +50,27 @@ export default function Home() {
         {error && <div className={styles.error}>{error}</div>}
 
         <ShippingResults results={results} />
+
+        <footer
+          className={styles.footer}
+          style={{
+            marginTop: "2rem",
+            paddingTop: "1rem",
+            borderTop: "1px solid #eaeaea",
+            fontSize: "0.9rem",
+            color: "#666",
+          }}
+        >
+          <p>
+            <strong>Informasi Pengirim:</strong>
+          </p>
+          <p>Jl Bambu Duri 2 No 3B, RT12 RW06 Pd. Bambu, Kec. Duren Sawit, </p>
+          <p>Kota Jakarta Timur, Daerah Khusus Ibukota Jakarta 13430</p>
+          <p>
+            <a href="mailto:it@javamifi.com">it@javamifi.com</a> |{" "}
+            <a href="tel:081908290270">081908290270</a>
+          </p>
+        </footer>
       </div>
     </main>
   );

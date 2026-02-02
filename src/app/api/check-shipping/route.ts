@@ -36,16 +36,23 @@ export async function POST(request: Request) {
       weight: Number(weight),
     };
 
-    const externalApiResponse = await fetch(
-      "https://auto-helper.javamifi.com/webhook/service/get-rates-service",
-      {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify(payload),
+    const RATES_API_URL = process.env.RATES_API_URL;
+
+    if (!RATES_API_URL) {
+      console.error("RATES_API_URL is not defined");
+      return NextResponse.json(
+        { error: "RATES_API_URL is not defined" },
+        { status: 500 },
+      );
+    }
+
+    const externalApiResponse = await fetch(RATES_API_URL, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
       },
-    );
+      body: JSON.stringify(payload),
+    });
 
     if (!externalApiResponse.ok) {
       const errorText = await externalApiResponse.text();

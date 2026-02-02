@@ -26,10 +26,8 @@ export interface ShippingCostResponse {
   error?: string;
 }
 
-const ADDRESS_API_URL =
-  "https://auto-helper.javamifi.com/webhook/service/list-address";
-const EXPEDITION_API_URL =
-  "https://auto-helper.javamifi.com/webhook/service/list-expedition";
+const ADDRESS_API_URL = process.env.NEXT_PUBLIC_ADDRESS_API_URL;
+const EXPEDITION_API_URL = process.env.NEXT_PUBLIC_EXPEDITION_API_URL;
 
 export const api = {
   /**
@@ -38,6 +36,10 @@ export const api = {
    */
   searchAddress: async (query: string): Promise<AddressResult[]> => {
     if (!query || query.length < 3) return [];
+    if (!ADDRESS_API_URL) {
+      console.error("ADDRESS_API_URL is not defined");
+      return [];
+    }
 
     try {
       // The API likely expects a query parameter, assuming 'q' or similar,
@@ -69,6 +71,11 @@ export const api = {
    * Get list of supported expeditions.
    */
   getExpeditions: async (): Promise<Expedition[]> => {
+    if (!EXPEDITION_API_URL) {
+      console.error("EXPEDITION_API_URL is not defined");
+      return [];
+    }
+
     try {
       const response = await fetch(EXPEDITION_API_URL);
       if (!response.ok) {
