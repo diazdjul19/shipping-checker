@@ -54,6 +54,12 @@
   margin: 0;
 }
 
+.serviceCode {
+  font-size: 0.9rem;
+  color: var(--text-secondary);
+  margin: 0;
+}
+
 .etd {
   font-size: 0.8rem;
   color: var(--text-muted);

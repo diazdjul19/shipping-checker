@@ -17,6 +17,7 @@ export async function POST(request: Request) {
       destination_address,
       latitude,
       longitude,
+      origin_postal_code = "13430",
     } = body;
 
     // Validate input
@@ -31,6 +32,7 @@ export async function POST(request: Request) {
       expedition,
       destination_address: destination_address || "",
       destination_postal_code,
+      origin_postal_code,
       latitude: latitude || "",
       longitude: longitude || "",
       weight: Number(weight),
