@@ -134,3 +134,65 @@ export const api = {
     }
   },
 };
+
+export interface AwbPayload {
+  order_info: {
+    order_id: string;
+    courier: string;
+    service_code: string;
+    desc_of_goods: string;
+  };
+  origin: {
+    name: string;
+    phone: string;
+    address_1: string;
+    address_2?: string;
+    city: string;
+    zip: string;
+    branch_code?: string;
+  };
+  destination: {
+    name: string;
+    phone: string;
+    address_1: string;
+    address_2?: string;
+    kecamatan?: string;
+    city: string;
+    state?: string;
+    zip: string;
+    dest_code?: string;
+  };
+  package: {
+    weight: number;
+    qty: number;
+    value: number;
+  };
+}
+
+export interface AwbResponse {
+  success: boolean;
+  order_id?: string;
+  awb?: string;
+  barcode_awb?: string;
+  expedition_logo?: string;
+  error?: string;
+}
+
+export const generateAwb = async (
+  payload: AwbPayload,
+): Promise<AwbResponse> => {
+  try {
+    const response = await fetch("/api/create-awb", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, error: data.error || "Gagal membuat AWB" };
+    }
+    return data;
+  } catch (error) {
+    return { success: false, error: "Network error" };
+  }
+};

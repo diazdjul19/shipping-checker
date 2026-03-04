@@ -10,11 +10,26 @@ export default function Home() {
   const [loading, setLoading] = useState(false);
   const [results, setResults] = useState<ShippingPlan[]>([]);
   const [error, setError] = useState("");
+  const [shippingContext, setShippingContext] = useState<
+    | {
+        expedition: string;
+        destination_address: string;
+        destination_postal_code: string;
+        weight: number;
+      }
+    | undefined
+  >(undefined);
 
   const handleCheckShipping = async (payload: any) => {
     setLoading(true);
     setError("");
     setResults([]);
+    setShippingContext({
+      expedition: payload.expedition,
+      destination_address: payload.destination_address,
+      destination_postal_code: payload.destination_postal_code,
+      weight: payload.weight,
+    });
 
     try {
       const response = await api.checkShippingCost(payload);
@@ -49,7 +64,7 @@ export default function Home() {
 
         {error && <div className={styles.error}>{error}</div>}
 
-        <ShippingResults results={results} />
+        <ShippingResults results={results} shippingContext={shippingContext} />
 
         <footer
           className={styles.footer}
