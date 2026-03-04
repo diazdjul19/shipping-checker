@@ -196,3 +196,53 @@ export const generateAwb = async (
     return { success: false, error: "Network error" };
   }
 };
+
+export interface TrackingHistoryItem {
+  date: string;
+  description: string;
+  location: string;
+}
+
+export interface TrackingResult {
+  courier: string;
+  awb: string;
+  status_summary: string;
+  receiver: string;
+  history: TrackingHistoryItem[];
+}
+
+export interface TrackingResponse {
+  success: boolean;
+  result?: TrackingResult;
+  error?: string;
+}
+
+export const trackAwb = async (
+  expedition: string,
+  awb_number: string,
+): Promise<TrackingResponse> => {
+  try {
+    const response = await fetch("/api/track-awb", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ expedition, awb_number }),
+    });
+    const data = await response.json();
+
+    if (!response.ok) {
+      return { success: false, error: data.error || "Gagal melacak paket." };
+    }
+
+    // Handle internal API error response even if HTTP status is 200
+    if (data.result && data.result.status === "error") {
+      return {
+        success: false,
+        error: data.result.message || "Gagal melacak paket.",
+      };
+    }
+
+    return data;
+  } catch {
+    return { success: false, error: "Network error" };
+  }
+};
