@@ -22,7 +22,10 @@ export async function POST(req: NextRequest) {
 
     const response = await fetch(TRACKING_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: { 
+        "Content-Type": "application/json",
+        "xauth-service-delivery": process.env.XAUTH_SERVICE_DELIVERY || ""
+      },
       body: JSON.stringify({ expedition, awb_number }),
     });
 

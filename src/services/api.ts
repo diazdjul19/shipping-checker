@@ -26,41 +26,39 @@ export interface ShippingCostResponse {
   error?: string;
 }
 
-const ADDRESS_API_URL = process.env.NEXT_PUBLIC_ADDRESS_API_URL;
+const GEOAPIFY_API_KEY = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY;
 const EXPEDITION_API_URL = process.env.NEXT_PUBLIC_EXPEDITION_API_URL;
 
 export const api = {
   /**
-   * Search for an address using the external helper service.
+   * Search for an address using Geoapify Geocoding API (Indonesia only).
    * @param query The search string
    */
   searchAddress: async (query: string): Promise<AddressResult[]> => {
     if (!query || query.length < 3) return [];
-    if (!ADDRESS_API_URL) {
-      console.error("ADDRESS_API_URL is not defined");
+    if (!GEOAPIFY_API_KEY) {
+      console.error("NEXT_PUBLIC_GEOAPIFY_API_KEY is not defined");
       return [];
     }
 
     try {
-      // The API likely expects a query parameter, assuming 'q' or similar,
-      // but based on typical webhook/service structures, it might just accept a generic payload or query param.
-      // Let's assume generic GET or POST.
-      // Requirement says: "Data alamat diambil dari API berikut."
-      // Let's try to pass it as a query param `query` or `q`.
-      // NOTE: Since I cannot see the API docs, I will assume a standard implementation but add error handling.
+      const url = new URL("https://api.geoapify.com/v1/geocode/autocomplete");
+      url.searchParams.set("text", query);
+      url.searchParams.set("filter", "countrycode:id");
+      url.searchParams.set("lang", "id");
+      url.searchParams.set("limit", "7");
+      url.searchParams.set("apiKey", GEOAPIFY_API_KEY);
 
-      const response = await fetch(
-        `${ADDRESS_API_URL}?query=${encodeURIComponent(query)}`,
-      );
-
-      if (!response.ok) {
-        throw new Error("Failed to fetch addresses");
-      }
+      const response = await fetch(url.toString());
+      if (!response.ok) throw new Error("Failed to fetch addresses");
 
       const data = await response.json();
-      // Assume data is an array or has a results property.
-      // Adjusting to ensure we return an array.
-      return Array.isArray(data) ? data : data.results || [];
+      return (data.features || []).map((feature: any) => ({
+        address: feature.properties.formatted || "",
+        postal_code: feature.properties.postcode || "",
+        lat: String(feature.properties.lat ?? ""),
+        lon: String(feature.properties.lon ?? ""),
+      }));
     } catch (error) {
       console.error("Error searching address:", error);
       return [];
@@ -146,7 +144,7 @@ export interface AwbPayload {
     name: string;
     phone: string;
     address_1: string;
-    address_2?: string;
+    address_2?: string | null;
     city: string;
     zip: string;
     branch_code?: string;
@@ -155,7 +153,7 @@ export interface AwbPayload {
     name: string;
     phone: string;
     address_1: string;
-    address_2?: string;
+    address_2?: string | null;
     kecamatan?: string;
     city: string;
     state?: string;

@@ -15,6 +15,8 @@ function CreateAwbContent() {
   const weight = params.get("weight") || "";
   const destAddress = params.get("dest_address") || "";
   const destPostal = params.get("dest_postal") || "";
+  const destLat = params.get("dest_lat") || "";
+  const destLng = params.get("dest_lng") || "";
 
   return (
     <main className={styles.main}>
@@ -63,6 +65,8 @@ function CreateAwbContent() {
           prefillWeight={weight}
           prefillDestAddress={destAddress}
           prefillDestPostal={destPostal}
+          prefillDestLat={destLat}
+          prefillDestLng={destLng}
         />
       </div>
     </main>

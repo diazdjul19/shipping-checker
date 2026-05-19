@@ -1,0 +1,14 @@
+.mapContainer {
+  width: 100%;
+  height: 320px;
+  border-radius: 10px;
+  overflow: hidden;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+}
+
+/* Override Leaflet z-index inside map to not conflict with form dropdowns */
+.mapContainer :global(.leaflet-top),
+.mapContainer :global(.leaflet-bottom) {
+  z-index: 400;
+}

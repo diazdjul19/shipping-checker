@@ -17,7 +17,7 @@ export async function POST(request: Request) {
       destination_address,
       latitude,
       longitude,
-      origin_postal_code = "13430",
+      origin_postal_code = process.env.ORIGIN_POSTAL_CODE,
     } = body;
 
     // Validate input
@@ -28,13 +28,18 @@ export async function POST(request: Request) {
       );
     }
 
+    const originLat = parseFloat(process.env.ORIGIN_LAT || "0");
+    const originLng = parseFloat(process.env.ORIGIN_LNG || "0");
+
     const payload = {
       expedition,
       destination_address: destination_address || "",
-      destination_postal_code,
       origin_postal_code,
-      latitude: latitude || "",
-      longitude: longitude || "",
+      destination_postal_code,
+      origin_lat: originLat,
+      origin_lng: originLng,
+      destination_lat: parseFloat(latitude) || 0,
+      destination_lng: parseFloat(longitude) || 0,
       weight: Number(weight),
     };
 
@@ -52,6 +57,7 @@ export async function POST(request: Request) {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
+        "xauth-service-delivery": process.env.XAUTH_SERVICE_DELIVERY || "",
       },
       body: JSON.stringify(payload),
     });
@@ -103,7 +109,7 @@ export async function POST(request: Request) {
 
     return NextResponse.json({
       success: true,
-      origin: "Jakarta", // As per user context, might be fixed or dynamic later
+      origin: "Jakarta",
       destination_postal: destination_postal_code,
       expedition: expedition,
       weight: payload.weight,

@@ -16,6 +16,8 @@ export default function Home() {
         destination_address: string;
         destination_postal_code: string;
         weight: number;
+        latitude: string;
+        longitude: string;
       }
     | undefined
   >(undefined);
@@ -29,6 +31,8 @@ export default function Home() {
       destination_address: payload.destination_address,
       destination_postal_code: payload.destination_postal_code,
       weight: payload.weight,
+      latitude: payload.latitude || "",
+      longitude: payload.longitude || "",
     });
 
     try {

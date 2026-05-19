@@ -1,9 +1,16 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import { useRouter } from "next/navigation";
 import { generateAwb, AwbResponse } from "@/services/api";
 import styles from "./AwbForm.module.css";
+
+const MapPicker = dynamic(() => import("./MapPicker"), { ssr: false });
+
+const INDONESIA_CENTER: [number, number] = [-2.5, 118.0];
+const INDONESIA_ZOOM = 5;
+const DETAIL_ZOOM = 15;
 
 interface AwbFormProps {
   courier: string;
@@ -11,6 +18,8 @@ interface AwbFormProps {
   prefillWeight?: string;
   prefillDestAddress?: string;
   prefillDestPostal?: string;
+  prefillDestLat?: string;
+  prefillDestLng?: string;
 }
 
 export default function AwbForm({
@@ -19,8 +28,12 @@ export default function AwbForm({
   prefillWeight = "",
   prefillDestAddress = "",
   prefillDestPostal = "",
+  prefillDestLat = "",
+  prefillDestLng = "",
 }: AwbFormProps) {
   const router = useRouter();
+
+  const geoapifyKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY || "";
 
   // order_info
   const [orderId, setOrderId] = useState("");
@@ -36,16 +49,31 @@ export default function AwbForm({
     zip: "13430",
   };
 
-  // destination
+  // destination fields
   const [destName, setDestName] = useState("");
   const [destPhone, setDestPhone] = useState("");
   const [destAddress1, setDestAddress1] = useState(prefillDestAddress);
   const [destAddress2, setDestAddress2] = useState("");
-  const [destKecamatan, setDestKecamatan] = useState("");
   const [destCity, setDestCity] = useState("");
-  const [destState, setDestState] = useState("");
   const [destZip, setDestZip] = useState(prefillDestPostal);
-  const [destCode, setDestCode] = useState("");
+
+  // destination lat/lng (from map)
+  const initLat = prefillDestLat ? parseFloat(prefillDestLat) : null;
+  const initLng = prefillDestLng ? parseFloat(prefillDestLng) : null;
+
+  const [destLat, setDestLat] = useState(prefillDestLat);
+  const [destLng, setDestLng] = useState(prefillDestLng);
+
+  const hasInitialLocation = initLat !== null && initLng !== null;
+  const [mapCenter, setMapCenter] = useState<[number, number]>(
+    hasInitialLocation ? [initLat!, initLng!] : INDONESIA_CENTER,
+  );
+  const [mapZoom, setMapZoom] = useState(
+    hasInitialLocation ? DETAIL_ZOOM : INDONESIA_ZOOM,
+  );
+  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(
+    hasInitialLocation ? [initLat!, initLng!] : null,
+  );
 
   // package
   const [weight, setWeight] = useState(prefillWeight);
@@ -56,8 +84,18 @@ export default function AwbForm({
   const [error, setError] = useState("");
   const [result, setResult] = useState<AwbResponse | null>(null);
 
+  const handleLocationChange = (lat: number, lng: number) => {
+    setDestLat(lat.toFixed(7));
+    setDestLng(lng.toFixed(7));
+    setMarkerPosition([lat, lng]);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!destLat || !destLng) {
+      setError("Pilih lokasi penerima di peta terlebih dahulu.");
+      return;
+    }
     setLoading(true);
     setError("");
 
@@ -80,12 +118,11 @@ export default function AwbForm({
         name: destName,
         phone: destPhone,
         address_1: destAddress1,
-        address_2: destAddress2,
-        kecamatan: destKecamatan,
+        address_2: destAddress2 || null,
         city: destCity,
-        state: destState,
         zip: destZip,
-        dest_code: destCode,
+        latitude: parseFloat(destLat),
+        longitude: parseFloat(destLng),
       },
       package: {
         weight: parseFloat(weight),
@@ -355,18 +392,7 @@ export default function AwbForm({
             onChange={(e) => setDestAddress2(e.target.value)}
           />
         </div>
-        <div className={styles.row3}>
-          <div className={styles.formGroup}>
-            <label htmlFor="destKecamatan">Kecamatan (opsional)</label>
-            <input
-              id="destKecamatan"
-              type="text"
-              className={styles.input}
-              placeholder="Sukmajaya"
-              value={destKecamatan}
-              onChange={(e) => setDestKecamatan(e.target.value)}
-            />
-          </div>
+        <div className={styles.row2}>
           <div className={styles.formGroup}>
             <label htmlFor="destCity">Kota</label>
             <input
@@ -380,19 +406,6 @@ export default function AwbForm({
             />
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="destState">Provinsi (opsional)</label>
-            <input
-              id="destState"
-              type="text"
-              className={styles.input}
-              placeholder="Jawa Barat"
-              value={destState}
-              onChange={(e) => setDestState(e.target.value)}
-            />
-          </div>
-        </div>
-        <div className={styles.row2}>
-          <div className={styles.formGroup}>
             <label htmlFor="destZip">Kode Pos</label>
             <input
               id="destZip"
@@ -402,6 +415,48 @@ export default function AwbForm({
               value={destZip}
               onChange={(e) => setDestZip(e.target.value)}
               required
+            />
+          </div>
+        </div>
+
+        {/* Map Picker for destination */}
+        <div className={styles.formGroup} style={{ marginTop: "0.5rem" }}>
+          <label>Lokasi Penerima di Peta</label>
+          <MapPicker
+            center={mapCenter}
+            zoom={mapZoom}
+            markerPosition={markerPosition}
+            onLocationChange={handleLocationChange}
+            apiKey={geoapifyKey}
+          />
+          <p className={styles.mapHint}>
+            💡 Klik pada peta atau drag marker untuk menyesuaikan lokasi
+            penerima
+          </p>
+        </div>
+
+        {/* Lat/Lng display */}
+        <div className={styles.row2}>
+          <div className={styles.formGroup}>
+            <label htmlFor="destLat">Latitude</label>
+            <input
+              id="destLat"
+              type="text"
+              className={`${styles.input} ${styles.inputDisabled}`}
+              value={destLat}
+              readOnly
+              placeholder="Pilih dari peta"
+            />
+          </div>
+          <div className={styles.formGroup}>
+            <label htmlFor="destLng">Longitude</label>
+            <input
+              id="destLng"
+              type="text"
+              className={`${styles.input} ${styles.inputDisabled}`}
+              value={destLng}
+              readOnly
+              placeholder="Pilih dari peta"
             />
           </div>
         </div>
@@ -417,7 +472,11 @@ export default function AwbForm({
         >
           ← Kembali
         </button>
-        <button type="submit" className={styles.submitBtn} disabled={loading}>
+        <button
+          type="submit"
+          className={styles.submitBtn}
+          disabled={loading || !destLat || !destLng}
+        >
           {loading ? "Membuat AWB..." : "Generate AWB"}
         </button>
       </div>

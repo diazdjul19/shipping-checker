@@ -27,21 +27,21 @@ export async function POST(request: Request) {
         name: origin.name,
         phone: origin.phone,
         address_1: origin.address_1,
-        address_2: origin.address_2 || "",
+        address_2: origin.address_2 ?? null,
         city: origin.city,
-        zip: origin.zip,
-        branch_code: origin.branch_code || "",
+        zip: parseInt(process.env.ORIGIN_POSTAL_CODE || "0"),
+        latitude: parseFloat(process.env.ORIGIN_LAT || "0"),
+        longitude: parseFloat(process.env.ORIGIN_LNG || "0"),
       },
       destination: {
         name: destination.name,
         phone: destination.phone,
         address_1: destination.address_1,
-        address_2: destination.address_2 || "",
-        kecamatan: destination.kecamatan || "",
+        address_2: destination.address_2 ?? null,
         city: destination.city,
-        state: destination.state || "",
         zip: destination.zip,
-        dest_code: destination.dest_code || "",
+        latitude: Number(destination.latitude) || 0,
+        longitude: Number(destination.longitude) || 0,
       },
       package: {
         weight: Number(pkg.weight),
@@ -55,7 +55,10 @@ export async function POST(request: Request) {
 
     const externalRes = await fetch(AWB_API_URL, {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "xauth-service-delivery": process.env.XAUTH_SERVICE_DELIVERY || "",
+      },
       body: JSON.stringify(payload),
     });
 

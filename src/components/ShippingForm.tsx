@@ -1,8 +1,16 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import dynamic from "next/dynamic";
 import { api, AddressResult, Expedition } from "@/services/api";
 import styles from "./ShippingForm.module.css";
+
+// Dynamic import to avoid SSR issues with Leaflet
+const MapPicker = dynamic(() => import("./MapPicker"), { ssr: false });
+
+const INDONESIA_CENTER: [number, number] = [-2.5, 118.0];
+const INDONESIA_ZOOM = 5;
+const DETAIL_ZOOM = 15;
 
 interface ShippingFormProps {
   onCheckShipping: (payload: any) => void;
@@ -19,13 +27,20 @@ export default function ShippingForm({
   const [lon, setLon] = useState("");
   const [addressResults, setAddressResults] = useState<AddressResult[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-
   const [selectedAddress, setSelectedAddress] = useState<AddressResult | null>(
     null,
   );
+
+  // Map state
+  const [mapCenter, setMapCenter] = useState<[number, number]>(INDONESIA_CENTER);
+  const [mapZoom, setMapZoom] = useState(INDONESIA_ZOOM);
+  const [markerPosition, setMarkerPosition] = useState<[number, number] | null>(null);
+
   const [expeditions, setExpeditions] = useState<Expedition[]>([]);
   const [selectedExpedition, setSelectedExpedition] = useState("");
   const [weight, setWeight] = useState("");
+
+  const geoapifyKey = process.env.NEXT_PUBLIC_GEOAPIFY_API_KEY || "";
 
   useEffect(() => {
     async function fetchExpeditions() {
@@ -59,24 +74,54 @@ export default function ShippingForm({
     setLat(address.lat);
     setLon(address.lon);
     setShowSuggestions(false);
+
+    if (address.lat && address.lon) {
+      const center: [number, number] = [
+        parseFloat(address.lat),
+        parseFloat(address.lon),
+      ];
+      setMapCenter(center);
+      setMapZoom(DETAIL_ZOOM);
+      setMarkerPosition(center);
+    }
+  };
+
+  const handleLocationChange = (newLat: number, newLng: number) => {
+    const latStr = newLat.toFixed(7);
+    const lngStr = newLng.toFixed(7);
+    setLat(latStr);
+    setLon(lngStr);
+    setMarkerPosition([newLat, newLng]);
+    // Ensure submit is possible even if location picked from map only
+    if (!selectedAddress) {
+      setSelectedAddress({
+        address: addressQuery || "Lokasi dari peta",
+        postal_code: postalCode,
+        lat: latStr,
+        lon: lngStr,
+      });
+    }
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!selectedAddress || !selectedExpedition || !weight) return;
+    if (!selectedExpedition || !weight || !lat || !lon) return;
 
     onCheckShipping({
       weight: parseFloat(weight),
       expedition: selectedExpedition,
       destination_postal_code: postalCode,
-      destination_address: selectedAddress.address,
+      destination_address: selectedAddress?.address || addressQuery || "",
       latitude: lat,
       longitude: lon,
     });
   };
 
+  const isLocationSet = lat !== "" && lon !== "";
+
   return (
     <form className={styles.form} onSubmit={handleSubmit}>
+      {/* Tujuan Pengiriman */}
       <div className={styles.row}>
         <div className={styles.formGroup}>
           <label htmlFor="address">Tujuan Pengiriman</label>
@@ -103,16 +148,23 @@ export default function ShippingForm({
                   e.target.value !== selectedAddress.address
                 ) {
                   setSelectedAddress(null);
+                  setMarkerPosition(null);
+                  setLat("");
+                  setLon("");
                 }
               }}
               autoComplete="off"
-              required
             />
             {showSuggestions && addressResults.length > 0 && (
               <ul className={styles.suggestions}>
                 {addressResults.map((item, idx) => (
                   <li key={idx} onClick={() => handleSelectAddress(item)}>
-                    {item.address} ({item.postal_code})
+                    <span className={styles.suggestionMain}>{item.address}</span>
+                    {item.postal_code && (
+                      <span className={styles.suggestionPostal}>
+                        {item.postal_code}
+                      </span>
+                    )}
                   </li>
                 ))}
               </ul>
@@ -121,6 +173,24 @@ export default function ShippingForm({
         </div>
       </div>
 
+      {/* Map Picker */}
+      <div className={styles.row}>
+        <div className={styles.formGroupFull}>
+          <label>Pilih Lokasi di Peta</label>
+          <MapPicker
+            center={mapCenter}
+            zoom={mapZoom}
+            markerPosition={markerPosition}
+            onLocationChange={handleLocationChange}
+            apiKey={geoapifyKey}
+          />
+          <p className={styles.mapHint}>
+            💡 Klik pada peta atau drag marker untuk menyesuaikan lokasi pinpoint
+          </p>
+        </div>
+      </div>
+
+      {/* Postal Code, Lat, Lon */}
       <div className={styles.row}>
         <div className={styles.formGroup}>
           <label htmlFor="postalCode">Postal Code</label>
@@ -130,7 +200,6 @@ export default function ShippingForm({
             className={styles.input}
             value={postalCode}
             onChange={(e) => setPostalCode(e.target.value)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
             required
           />
         </div>
@@ -139,11 +208,10 @@ export default function ShippingForm({
           <input
             id="lat"
             type="text"
-            className={styles.input}
+            className={`${styles.input} ${styles.readOnly}`}
             value={lat}
-            onChange={(e) => setLat(e.target.value)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            required
+            readOnly
+            placeholder="Pilih dari peta"
           />
         </div>
         <div className={styles.formGroup}>
@@ -151,15 +219,15 @@ export default function ShippingForm({
           <input
             id="lon"
             type="text"
-            className={styles.input}
+            className={`${styles.input} ${styles.readOnly}`}
             value={lon}
-            onChange={(e) => setLon(e.target.value)}
-            onBlur={() => setTimeout(() => setShowSuggestions(false), 200)}
-            required
+            readOnly
+            placeholder="Pilih dari peta"
           />
         </div>
       </div>
 
+      {/* Ekspedisi & Berat */}
       <div className={styles.row}>
         <div className={styles.formGroup}>
           <label htmlFor="expedition">Ekspedisi</label>
@@ -197,7 +265,7 @@ export default function ShippingForm({
       <button
         type="submit"
         className={styles.submitBtn}
-        disabled={isLoading || !selectedAddress}
+        disabled={isLoading || !isLocationSet}
       >
         {isLoading ? "Memuat..." : "Cek Ongkir"}
       </button>
