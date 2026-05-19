@@ -10,6 +10,7 @@ interface ShippingResultsProps {
     expedition: string;
     destination_address: string;
     destination_postal_code: string;
+    destination_city: string;
     weight: number;
     latitude: string;
     longitude: string;
@@ -33,6 +34,7 @@ export default function ShippingResults({
       weight: String(shippingContext?.weight || ""),
       dest_address: shippingContext?.destination_address || "",
       dest_postal: shippingContext?.destination_postal_code || "",
+      dest_city: shippingContext?.destination_city || "",
       dest_lat: shippingContext?.latitude || "",
       dest_lng: shippingContext?.longitude || "",
     });

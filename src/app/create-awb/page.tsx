@@ -15,6 +15,7 @@ function CreateAwbContent() {
   const weight = params.get("weight") || "";
   const destAddress = params.get("dest_address") || "";
   const destPostal = params.get("dest_postal") || "";
+  const destCity = params.get("dest_city") || "";
   const destLat = params.get("dest_lat") || "";
   const destLng = params.get("dest_lng") || "";
 
@@ -65,6 +66,7 @@ function CreateAwbContent() {
           prefillWeight={weight}
           prefillDestAddress={destAddress}
           prefillDestPostal={destPostal}
+          prefillDestCity={destCity}
           prefillDestLat={destLat}
           prefillDestLng={destLng}
         />

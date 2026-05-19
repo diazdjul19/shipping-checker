@@ -4,10 +4,12 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import styles from "./Navbar.module.css";
 
-const navLinks = [
-  { href: "/", label: "Cek Ongkir" },
-  // { href: "/create-awb", label: "Buat AWB" },
+const navLinks = [{ href: "/", label: "Cek Ongkir" }];
+
+const awbLinks = [
   { href: "/track-awb", label: "Tracking AWB" },
+  { href: "/records", label: "Riwayat AWB" },
+  { href: "/gosend-logs", label: "Log GoSend - DEV" },
 ];
 
 export default function Navbar() {
@@ -44,6 +46,37 @@ export default function Navbar() {
               {label}
             </Link>
           ))}
+
+          <div className={styles.dropdown}>
+            <span
+              className={`${styles.link} ${styles.dropdownBtn} ${awbLinks.some((l) => pathname === l.href) ? styles.linkActive : ""}`}
+            >
+              Menu AWB
+              <svg
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <path d="M6 9l6 6 6-6" />
+              </svg>
+            </span>
+            <div className={styles.dropdownContent}>
+              {awbLinks.map(({ href, label }) => (
+                <Link
+                  key={href}
+                  href={href}
+                  className={`${styles.dropdownItem} ${pathname === href ? styles.linkActive : ""}`}
+                >
+                  {label}
+                </Link>
+              ))}
+            </div>
+          </div>
         </div>
       </div>
     </nav>

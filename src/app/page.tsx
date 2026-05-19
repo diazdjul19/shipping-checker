@@ -15,6 +15,7 @@ export default function Home() {
         expedition: string;
         destination_address: string;
         destination_postal_code: string;
+        destination_city: string;
         weight: number;
         latitude: string;
         longitude: string;
@@ -30,6 +31,7 @@ export default function Home() {
       expedition: payload.expedition,
       destination_address: payload.destination_address,
       destination_postal_code: payload.destination_postal_code,
+      destination_city: payload.destination_city || "",
       weight: payload.weight,
       latitude: payload.latitude || "",
       longitude: payload.longitude || "",

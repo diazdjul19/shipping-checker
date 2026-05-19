@@ -3,7 +3,7 @@ export interface AddressResult {
   postal_code: string;
   lat: string;
   lon: string;
-  // API might return more fields, but these are what we need based on requirements
+  city?: string;
 }
 
 export interface Expedition {
@@ -58,6 +58,7 @@ export const api = {
         postal_code: feature.properties.postcode || "",
         lat: String(feature.properties.lat ?? ""),
         lon: String(feature.properties.lon ?? ""),
+        city: feature.properties.city || feature.properties.county || "",
       }));
     } catch (error) {
       console.error("Error searching address:", error);

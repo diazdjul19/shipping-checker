@@ -18,6 +18,7 @@ interface AwbFormProps {
   prefillWeight?: string;
   prefillDestAddress?: string;
   prefillDestPostal?: string;
+  prefillDestCity?: string;
   prefillDestLat?: string;
   prefillDestLng?: string;
 }
@@ -28,6 +29,7 @@ export default function AwbForm({
   prefillWeight = "",
   prefillDestAddress = "",
   prefillDestPostal = "",
+  prefillDestCity = "",
   prefillDestLat = "",
   prefillDestLng = "",
 }: AwbFormProps) {
@@ -43,8 +45,8 @@ export default function AwbForm({
   const ORIGIN = {
     name: "Javamifi",
     phone: "081908290270",
-    address_1: "Jl Bambu Duri 2 No 3B, RT12 RW06 Pd. Bambu",
-    address_2: "Kec. Duren Sawit",
+    address_1: "Jl Bambu Duri 2 No 3B, RT12 RW06 Pd. Bambu Kec. Duren Sawit",
+    address_2: "",
     city: "Kota Jakarta Timur",
     zip: "13430",
   };
@@ -54,7 +56,7 @@ export default function AwbForm({
   const [destPhone, setDestPhone] = useState("");
   const [destAddress1, setDestAddress1] = useState(prefillDestAddress);
   const [destAddress2, setDestAddress2] = useState("");
-  const [destCity, setDestCity] = useState("");
+  const [destCity, setDestCity] = useState(prefillDestCity);
   const [destZip, setDestZip] = useState(prefillDestPostal);
 
   // destination lat/lng (from map)
@@ -191,14 +193,16 @@ export default function AwbForm({
       {/* Top info bar: Order ID input + kurir + kode layanan */}
       <div className={styles.readonlyRow}>
         <div className={`${styles.readonlyField} ${styles.orderIdField}`}>
-          <label htmlFor="orderId" className={styles.readonlyLabel}>
+          {/* <label htmlFor="orderId" className={styles.readonlyLabel}>
             Order ID
+          </label> */}
+          <label htmlFor="orderId">
+            Order ID <span style={{ color: "red" }}>*</span>
           </label>
           <input
             id="orderId"
             type="text"
             className={styles.input}
-            placeholder="Cth: ORD-2026030490001"
             value={orderId}
             onChange={(e) => setOrderId(e.target.value)}
             required
@@ -223,10 +227,8 @@ export default function AwbForm({
             id="descOfGoods"
             type="text"
             className={styles.input}
-            placeholder="Cth: Modem WiFi..."
             value={descOfGoods}
             onChange={(e) => setDescOfGoods(e.target.value)}
-            required
           />
         </div>
         <div className={styles.row3}>
@@ -237,10 +239,11 @@ export default function AwbForm({
               type="number"
               step="0.1"
               min="0.1"
-              className={styles.input}
+              className={`${styles.input} ${styles.inputDisabled}`}
               value={weight}
               onChange={(e) => setWeight(e.target.value)}
               required
+              disabled
             />
           </div>
           <div className={styles.formGroup}>
@@ -249,10 +252,11 @@ export default function AwbForm({
               id="qty"
               type="number"
               min="1"
-              className={styles.input}
+              className={`${styles.input} ${styles.inputDisabled}`}
               value={qty}
               onChange={(e) => setQty(e.target.value)}
               required
+              disabled
             />
           </div>
           <div className={styles.formGroup}>
@@ -262,10 +266,8 @@ export default function AwbForm({
               type="number"
               min="0"
               className={styles.input}
-              placeholder="500000"
               value={value}
               onChange={(e) => setValue(e.target.value)}
-              required
             />
           </div>
         </div>
@@ -306,7 +308,7 @@ export default function AwbForm({
             disabled
           />
         </div>
-        <div className={styles.formGroup}>
+        {/* <div className={styles.formGroup}>
           <label htmlFor="originAddress2">Alamat Baris 2</label>
           <input
             id="originAddress2"
@@ -315,7 +317,7 @@ export default function AwbForm({
             value={ORIGIN.address_2}
             disabled
           />
-        </div>
+        </div> */}
         <div className={styles.row2}>
           <div className={styles.formGroup}>
             <label htmlFor="originCity">Kota</label>
@@ -345,24 +347,26 @@ export default function AwbForm({
         <h3 className={styles.sectionTitle}>Data Penerima</h3>
         <div className={styles.row2}>
           <div className={styles.formGroup}>
-            <label htmlFor="destName">Nama Penerima</label>
+            <label htmlFor="destName">
+              Nama Penerima <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="destName"
               type="text"
               className={styles.input}
-              placeholder="Nama penerima"
               value={destName}
               onChange={(e) => setDestName(e.target.value)}
               required
             />
           </div>
           <div className={styles.formGroup}>
-            <label htmlFor="destPhone">No. Telepon</label>
+            <label htmlFor="destPhone">
+              No. Telepon <span style={{ color: "red" }}>*</span>
+            </label>
             <input
               id="destPhone"
               type="tel"
               className={styles.input}
-              placeholder="08xxxxxxxxxx"
               value={destPhone}
               onChange={(e) => setDestPhone(e.target.value)}
               required
@@ -374,35 +378,34 @@ export default function AwbForm({
           <input
             id="destAddress1"
             type="text"
-            className={styles.input}
-            placeholder="Nama jalan & nomor"
+            className={`${styles.input} ${styles.inputDisabled}`}
             value={destAddress1}
             onChange={(e) => setDestAddress1(e.target.value)}
             required
+            disabled
           />
         </div>
-        <div className={styles.formGroup}>
+        {/* <div className={styles.formGroup}>
           <label htmlFor="destAddress2">Alamat Baris 2 (opsional)</label>
           <input
             id="destAddress2"
             type="text"
             className={styles.input}
-            placeholder="Blok, RT/RW, dll."
             value={destAddress2}
             onChange={(e) => setDestAddress2(e.target.value)}
           />
-        </div>
+        </div> */}
         <div className={styles.row2}>
           <div className={styles.formGroup}>
             <label htmlFor="destCity">Kota</label>
             <input
               id="destCity"
               type="text"
-              className={styles.input}
-              placeholder="Depok"
+              className={`${styles.input} ${styles.inputDisabled}`}
               value={destCity}
               onChange={(e) => setDestCity(e.target.value)}
               required
+              disabled
             />
           </div>
           <div className={styles.formGroup}>
@@ -410,17 +413,17 @@ export default function AwbForm({
             <input
               id="destZip"
               type="text"
-              className={styles.input}
-              placeholder="16411"
+              className={`${styles.input} ${styles.inputDisabled}`}
               value={destZip}
               onChange={(e) => setDestZip(e.target.value)}
               required
+              disabled
             />
           </div>
         </div>
 
         {/* Map Picker for destination */}
-        <div className={styles.formGroup} style={{ marginTop: "0.5rem" }}>
+        {/* <div className={styles.formGroup} style={{ marginTop: "0.5rem" }}>
           <label>Lokasi Penerima di Peta</label>
           <MapPicker
             center={mapCenter}
@@ -433,7 +436,7 @@ export default function AwbForm({
             💡 Klik pada peta atau drag marker untuk menyesuaikan lokasi
             penerima
           </p>
-        </div>
+        </div> */}
 
         {/* Lat/Lng display */}
         <div className={styles.row2}>
@@ -445,7 +448,6 @@ export default function AwbForm({
               className={`${styles.input} ${styles.inputDisabled}`}
               value={destLat}
               readOnly
-              placeholder="Pilih dari peta"
             />
           </div>
           <div className={styles.formGroup}>
@@ -456,7 +458,6 @@ export default function AwbForm({
               className={`${styles.input} ${styles.inputDisabled}`}
               value={destLng}
               readOnly
-              placeholder="Pilih dari peta"
             />
           </div>
         </div>

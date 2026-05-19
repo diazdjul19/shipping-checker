@@ -112,6 +112,7 @@ export default function ShippingForm({
       expedition: selectedExpedition,
       destination_postal_code: postalCode,
       destination_address: selectedAddress?.address || addressQuery || "",
+      destination_city: selectedAddress?.city || "",
       latitude: lat,
       longitude: lon,
     });
