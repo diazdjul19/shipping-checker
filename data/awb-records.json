@@ -82,5 +82,53 @@
     "recipient_city": "Bekasi",
     "weight": 12,
     "created_at": "2026-05-19T16:05:13.239Z"
+  },
+  {
+    "order_id": "ORD-TESTING121212",
+    "awb": "GK-11-3662196",
+    "barcode_awb": "https://barcode.tec-it.com/barcode.ashx?data=GK-11-3662196&code=Code128&translate-esc=on&width=75&height=20",
+    "expedition_logo": "https://cloudbantex.niago.id/storage/bantex/javamifi-c3RbEOJaSV/Gosend_Logo.png?api_key=TwPMTNhTWRg772gTGDG0r5OJXydRAdP05t1SXLXK",
+    "courier": "GOSEND",
+    "service_code": "Instant",
+    "recipient_name": "Diaz Djuliansyah",
+    "recipient_city": "Jakarta Selatan",
+    "weight": 1,
+    "created_at": "2026-05-20T07:10:42.361Z"
+  },
+  {
+    "order_id": "ORD-12121216",
+    "awb": "GK-11-3662337",
+    "barcode_awb": "https://barcode.tec-it.com/barcode.ashx?data=GK-11-3662337&code=Code128&translate-esc=on&width=75&height=20",
+    "expedition_logo": "https://cloudbantex.niago.id/storage/bantex/javamifi-c3RbEOJaSV/Gosend_Logo.png?api_key=TwPMTNhTWRg772gTGDG0r5OJXydRAdP05t1SXLXK",
+    "courier": "GOSEND",
+    "service_code": "Instant",
+    "recipient_name": "Diaz Djuliansyah",
+    "recipient_city": "Jakarta Selatan",
+    "weight": 1,
+    "created_at": "2026-05-20T07:14:58.904Z"
+  },
+  {
+    "order_id": "ORD-12121217",
+    "awb": "GK-11-3662390",
+    "barcode_awb": "https://barcode.tec-it.com/barcode.ashx?data=GK-11-3662390&code=Code128&translate-esc=on&width=75&height=20",
+    "expedition_logo": "https://cloudbantex.niago.id/storage/bantex/javamifi-c3RbEOJaSV/Gosend_Logo.png?api_key=TwPMTNhTWRg772gTGDG0r5OJXydRAdP05t1SXLXK",
+    "courier": "GOSEND",
+    "service_code": "Instant",
+    "recipient_name": "Diaz Djuliansyah",
+    "recipient_city": "Jakarta Selatan",
+    "weight": 1,
+    "created_at": "2026-05-20T07:19:04.886Z"
+  },
+  {
+    "order_id": "TEST-9917123",
+    "awb": "GK-11-3663672",
+    "barcode_awb": "https://barcode.tec-it.com/barcode.ashx?data=GK-11-3663672&code=Code128&translate-esc=on&width=75&height=20",
+    "expedition_logo": "https://cloudbantex.niago.id/storage/bantex/javamifi-c3RbEOJaSV/Gosend_Logo.png?api_key=TwPMTNhTWRg772gTGDG0r5OJXydRAdP05t1SXLXK",
+    "courier": "GOSEND",
+    "service_code": "SameDay",
+    "recipient_name": "Diaz Djuliansyah",
+    "recipient_city": "Jakarta Selatan",
+    "weight": 1,
+    "created_at": "2026-05-21T03:08:55.656Z"
   }
 ]
